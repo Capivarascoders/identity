@@ -4,6 +4,8 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+import { EthersContractService } from './services/ethers.contract.service';
+
 @NgModule({
   declarations: [
     AppComponent
@@ -12,7 +14,11 @@ import { AppComponent } from './app.component';
     BrowserModule,
     AppRoutingModule
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [
+    EthersContractService
+  ],
+  bootstrap: [
+    AppComponent
+  ]
 })
 export class AppModule { }

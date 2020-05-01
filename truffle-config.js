@@ -8,7 +8,7 @@ module.exports = {
             host: '127.0.0.1',
             port: 8545,
             network_id: '*',
-            gas: 8000000,
+            gas: 3000000,
             gasPrice: 10000000000
         },
         ropsten: {
@@ -26,7 +26,7 @@ module.exports = {
         rinkeby: {
             provider: () => new HDWalletProvider(process.env.MNENOMIC, "https://rinkeby.infura.io/v3/" + process.env.INFURA_API_KEY),
             network_id: 4,
-            gas: 7000000,
+            gas: 3000000,
             gasPrice: 10000000000
         },
         main: {
