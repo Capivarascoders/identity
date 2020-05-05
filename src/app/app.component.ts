@@ -7,26 +7,13 @@ import { EthersContractService } from './services/ethers.contract.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'identity';
-  public value: string;
 
   constructor(
-    private etherContractService: EthersContractService
   ) {
 
   }
 
   ngOnInit(): void {
 
-  }
-
-  set() {
-    this.etherContractService.set('new value 3');
-  }
-
-  get() {
-    this.etherContractService.get().then((data) => {
-      this.value = data;
-    });
   }
 }
