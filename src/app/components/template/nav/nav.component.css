@@ -1,0 +1,24 @@
+.direction {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1%;
+    padding-left: 5%;
+    padding-right: 10%;
+    align-items: center;
+    font-size: 1.3em;
+}
+
+.direction-link {
+    display: flex;
+    justify-content: inherit;
+    align-items: center;
+    width: 25%;
+}
+
+.blue {
+    color: #0D47A1;
+}
+
+.blue-light {
+    color: #80DEEA;
+}

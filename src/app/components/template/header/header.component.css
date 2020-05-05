@@ -1,0 +1,39 @@
+.header {
+    margin-top: 1%;
+    height: 20%;
+    background: rgb(43,36,172);
+    background: linear-gradient(90deg, rgba(43,36,172,1) 5%, rgba(51,164,237,1) 74%, rgba(2,215,255,1) 100%);
+    display: flex;
+    justify-content: space-between;
+}
+
+.balance {
+    height: 60%;
+    width: 13%;
+}
+
+.content-text {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    font-size: 1.3rem;
+    font-weight: 100;
+}
+
+.content {
+    width: 18%;
+    display: fçex;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-around;
+}
+
+.vertical-line {
+    height: 500px;/*Altura da linha*/
+    border-left: 2px solid;
+}
+
+.balance-text {
+    color: white;
+}
+

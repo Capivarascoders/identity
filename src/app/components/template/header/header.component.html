@@ -1,0 +1,19 @@
+<mat-toolbar class="header">
+
+    <main class="content">
+        <figure class="dimension">
+            <img src="../../../../assets/img/clock.svg">
+        </figure>
+
+        <section class="content-text">
+            <p>Bem vindo, {{ name }}</p>
+            <p>{{ myDate | date: 'short' }}</p>
+        </section>
+    </main>
+
+    <section class="balance">
+        <p class="content-text">Meu saldo</p>
+        <p class="balance-text">{{ balance }}</p>
+    </section>
+
+</mat-toolbar>
