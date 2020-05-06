@@ -1,0 +1,81 @@
+<header class="spacing">
+    <h1>Validações pendentes</h1>
+    <button mat-raised-button class="button-color">Solicitar saque</button>
+</header>  
+
+<main class="main-home">
+
+    <section class="cards">
+        <mat-card class="card-validation">
+
+            <div class="wallet">
+                <p class="wallet-title-color">Wallet para validação</p>
+                <p class="wallet-number">{{ wallet }}</p>
+            </div>
+    
+            <div class="price">
+                <p>{{ price }}</p>
+            </div>
+    
+            <div class="validation-status">
+                <p>{{ validationStatus }}</p>
+            </div>
+        </mat-card>
+        <mat-card class="card-validation">
+    
+            <div class="wallet">
+                <p class="wallet-title-color">Wallet para validação</p>
+                <p class="wallet-number">{{ wallet }}</p>
+            </div>
+    
+            <div class="price">
+                <p>{{ price }}</p>
+            </div>
+    
+            <div class="validation-status">
+                <p>{{ validationStatus }}</p>
+            </div>
+        </mat-card>
+
+        <mat-card class="card-validation">
+    
+            <div class="wallet">
+                <p class="wallet-title-color">Wallet para validação</p>
+                <p class="wallet-number">{{ wallet }}</p>
+            </div>
+    
+            <div class="price">
+                <p>{{ price }}</p>
+            </div>
+    
+            <div class="validation-status">
+                <p>{{ validationStatus }}</p>
+            </div>
+        </mat-card>
+    </section>
+
+    <aside class="aside-content">
+        <mat-card class="card-aside"></mat-card>
+    </aside>
+</main>
+
+<section class="validations">
+    <h2>Ultimas validações</h2>
+
+    <mat-card class="card-validation background-yes">
+        <p class="wallet-title">Wallet validada</p>
+        <p class="wallet-number">{{ wallet }}</p>
+        <img src="../../../assets//img/yes.svg">
+    </mat-card>
+    <mat-card class="card-validation background-yes">
+        <p class="wallet-title">Wallet validada</p>
+        <p class="wallet-number">{{ wallet }}</p>
+        <img src="../../../assets//img/yes.svg">
+    </mat-card>
+    <mat-card class="card-validation background-no">
+        <p class="wallet-title">Wallet validada</p>
+        <p class="wallet-number">{{ wallet }}</p>
+        <img src="../../../assets//img/no.svg">
+    </mat-card>
+</section>
+

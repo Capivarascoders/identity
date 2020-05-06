@@ -15,14 +15,14 @@
     color: white;
     display: flex;
     flex-direction: column;
-    font-size: 1.3rem;
+    font-size: 1.0rem;
     font-weight: 100;
 }
 
 .content {
-    width: 18%;
+    width: 24%;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-around;
 }
 

@@ -1,0 +1,97 @@
+.spacing {
+    display: flex;
+    padding-top: 2%;
+    width: 27%;
+    justify-content: space-around;
+    align-items: baseline;
+}
+
+.button-color {
+    background: #42A5F5;
+    color: white;
+}
+
+mat-grid-list {
+    background-color: lightblue;
+}
+
+.grid-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.card-validation {
+    width: 62%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.main-home {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.wallet {
+    width: 10%s;
+    display: flex;
+    flex-direction: column;
+}
+
+.wallet-number {
+    font-size: 13px;
+    color: #BDBDBD;
+}
+
+.wallet-title-color {
+    color: #42A5F5;
+}
+
+.wallet-title {
+    font-size: 20px;
+    color: white
+}
+
+.price {
+    font-size: 13px;
+    color: blue;
+    font-weight: 500;
+}
+
+.aside-content {
+    height: 100vh;
+}
+
+.card-aside {
+    height: 100vh;
+    width: 29vw;
+}
+
+.cards {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
+}
+
+.validations {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    padding-left: 5%;
+}
+
+.background-yes {
+    height: 13%;
+    background: #26A69A;
+}
+
+.background-no {
+    height: 13%;
+    background: #EF5350;
+}
+
