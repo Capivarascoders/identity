@@ -210,5 +210,27 @@ contract('Identity', accounts => {
                     event.validationStatus == validationStatus.Validated
             );
         });
+
+        it('success increment score if status validated', async () => {
+            const field = 'name';
+            const price = 100;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.ForFree, price, { from: validator01Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address });
+
+            await contractInstance.validate(persona01Address, field, validationStatus.Validated, { from: validator01Address });
+
+            const result = await contractInstance.getPersona(persona01Address);
+
+            console.log(result.score.toNumber());
+        });
     });
 });
