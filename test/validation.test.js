@@ -18,6 +18,7 @@ contract('Identity', accounts => {
 
     const ownerAddress = accounts[0];
     const validator01Address = accounts[1];
+    const validator02Address = accounts[3];
     const persona01Address = accounts[2];
 
     before(async () => {
@@ -31,10 +32,11 @@ contract('Identity', accounts => {
     describe('askToValidate', async () => {
         it('should throw if validator not exists', async () => {
             const field = 'name';
+            const value = 'persona1';
             const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
 
             await Assert.reverts(
-                contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address }),
+                contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address }),
                 'Identity: validator not exists!'
             );
         });
@@ -43,12 +45,13 @@ contract('Identity', accounts => {
             const price = 100;
 
             const field = 'name';
+            const value = 'persona1';
             const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
 
             await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
 
             await Assert.reverts(
-                contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address }),
+                contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address }),
                 'Identity: persona not exists!'
             );
         });
@@ -57,6 +60,7 @@ contract('Identity', accounts => {
             const price = 100;
 
             const field = 'name';
+            const value = 'persona1';
             const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
 
             const validatorValue = 90;
@@ -69,7 +73,7 @@ contract('Identity', accounts => {
             await contractInstance.addPersona(fields, values, { from: persona01Address });
 
             await Assert.reverts(
-                contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address, value: validatorValue }),
+                contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address, value: validatorValue }),
                 'Identity: sended value is not the validator price!'
             );
         });
@@ -78,6 +82,7 @@ contract('Identity', accounts => {
             const price = 100;
 
             const field = 'email';
+            const value = '';
             const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
 
             const validatorValue = 100;
@@ -90,8 +95,8 @@ contract('Identity', accounts => {
             await contractInstance.addPersona(fields, values, { from: persona01Address });
 
             await Assert.reverts(
-                contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address, value: validatorValue }),
-                'Identity: field not exists!'
+                contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address, value: validatorValue }),
+                'Identity: field is not in persona fields, value is required'
             );
         });
 
@@ -99,6 +104,7 @@ contract('Identity', accounts => {
             const price = 100;
 
             const field = 'name';
+            const value = '';
             const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
 
             const validatorValue = 100;
@@ -110,7 +116,7 @@ contract('Identity', accounts => {
 
             await contractInstance.addPersona(fields, values, { from: persona01Address });
 
-            const result = await contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address, value: validatorValue });
+            const result = await contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address, value: validatorValue });
 
             Assert.eventEmitted(
                 result,
@@ -125,6 +131,7 @@ contract('Identity', accounts => {
             const price = 0;
 
             const field = 'name';
+            const value = '';
             const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
 
             const fields = ['name'];
@@ -134,7 +141,7 @@ contract('Identity', accounts => {
 
             await contractInstance.addPersona(fields, values, { from: persona01Address });
 
-            const result = await contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address });
+            const result = await contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address });
 
             Assert.eventEmitted(
                 result,
@@ -157,7 +164,7 @@ contract('Identity', accounts => {
 
         it('should throw if person not exists', async () => {
             const field = 'name';
-            const price = 100;
+            const price = 0;
 
             await contractInstance.addValidator(validationCostStrategy.ForFree, price, { from: validator01Address });
 
@@ -169,7 +176,7 @@ contract('Identity', accounts => {
 
         it('should throw if dataToBeValidate not exists', async () => {
             const field = 'name';
-            const price = 100;
+            const price = 0;
 
             const fields = ['name', 'email'];
             const values = ['persona1', 'persona1@email.com'];
@@ -186,7 +193,8 @@ contract('Identity', accounts => {
 
         it('success', async () => {
             const field = 'name';
-            const price = 100;
+            const value = '';
+            const price = 0;
 
             const fields = ['name', 'email'];
             const values = ['persona1', 'persona1@email.com'];
@@ -197,7 +205,7 @@ contract('Identity', accounts => {
 
             await contractInstance.addPersona(fields, values, { from: persona01Address });
 
-            await contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address });
+            await contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address });
 
             const result = await contractInstance.validate(persona01Address, field, validationStatus.Validated, { from: validator01Address });
 
@@ -211,9 +219,10 @@ contract('Identity', accounts => {
             );
         });
 
-        it('success increment score if status validated', async () => {
+        it('success increment persona score if status validated if status is valid', async () => {
             const field = 'name';
-            const price = 100;
+            const value = '';
+            const price = 0;
 
             const fields = ['name', 'email'];
             const values = ['persona1', 'persona1@email.com'];
@@ -224,13 +233,268 @@ contract('Identity', accounts => {
 
             await contractInstance.addPersona(fields, values, { from: persona01Address });
 
-            await contractInstance.askToValidate(validator01Address, field, ipfsHash, { from: persona01Address });
+            await contractInstance.askToValidate(validator01Address, field, value, ipfsHash, { from: persona01Address });
 
             await contractInstance.validate(persona01Address, field, validationStatus.Validated, { from: validator01Address });
 
-            const result = await contractInstance.getPersona(persona01Address);
+            const result = await contractInstance.getPersonaByAddress(persona01Address);
 
-            console.log(result.score.toNumber());
+            assert.equal(1, result.score.toNumber());
+        });
+
+        it('success decrement persona score if first validation status validated with stauts is not valid', async () => {
+            const field1 = 'name';
+            const value1 = '';
+
+            const field2 = 'email';
+            const value2 = '';
+
+            const price = 0;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.ForFree, price, { from: validator01Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address });
+
+            await contractInstance.validate(persona01Address, field1, validationStatus.NotValidated, { from: validator01Address });
+
+            const result = await contractInstance.getPersonaByAddress(persona01Address);
+
+            assert.equal(0, result.score.toNumber(), 'wrong score');
+        });
+
+        it('success decrement persona score if status validated with stauts is not valid', async () => {
+            const field1 = 'name';
+            const value1 = '';
+
+            const field2 = 'email';
+            const value2 = '';
+
+            const price = 0;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.ForFree, price, { from: validator01Address });
+
+            await contractInstance.addValidator(validationCostStrategy.ForFree, price, { from: validator02Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator02Address, field2, value2, ipfsHash, { from: persona01Address });
+
+            await contractInstance.validate(persona01Address, field1, validationStatus.Validated, { from: validator01Address });
+
+            const resultBeforeValidation = await contractInstance.getPersonaByAddress(persona01Address);
+
+            await contractInstance.validate(persona01Address, field2, validationStatus.NotValidated, { from: validator01Address });
+
+            const resultAfterValidation = await contractInstance.getPersonaByAddress(persona01Address);
+
+            assert.notEqual(resultBeforeValidation.score.toNumber(), resultAfterValidation.score.toNumber(), 'wrong score');
+        });
+
+        it('success transfer value to validator', async () => {
+            const field1 = 'name';
+            const value1 = '';
+
+            const price = 1000000000;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            let balanceValidatorBefore = await web3.eth.getBalance(validator01Address);
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address, value: price });
+
+            await contractInstance.validate(persona01Address, field1, validationStatus.Validated, { from: validator01Address });
+
+            let balanceValidatorAfter = await web3.eth.getBalance(validator01Address);
+
+            assert.notEqual(balanceValidatorBefore, balanceValidatorAfter, 'wrong balance');
+        });
+
+        it('success increment validator number of validation if validated', async () => {
+            const field1 = 'name';
+            const value1 = '';
+
+            const price = 1000000000;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address, value: price });
+
+            const validatorBefore = await contractInstance.getValidatorByAddress(validator01Address);
+
+            await contractInstance.validate(persona01Address, field1, validationStatus.Validated, { from: validator01Address });
+
+            const validatorAfter = await contractInstance.getValidatorByAddress(validator01Address);
+
+            assert.notEqual(validatorBefore.numberOfValidations, validatorAfter.numberOfValidations, 'wrong numberOfValidations');
+        });
+    });
+
+    describe('getIdsDataToBeValidatedIdByPersonaId', async () => {
+        it('success', async () => {
+            const price = 1000000000;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const field1 = 'name';
+            const value1 = '';
+
+            const field2 = 'email';
+            const value2 = '';
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator02Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address, value: price });
+
+            await contractInstance.askToValidate(validator02Address, field2, value2, ipfsHash, { from: persona01Address, value: price });
+
+            const persona = await contractInstance.getPersonaByAddress(persona01Address);
+
+            const result = await contractInstance.getIdsDataToBeValidatedIdByPersonaId(persona.personaId);
+
+            assert.equal(2, result.length, 'wrong length');
+        });
+    });
+
+    describe('getDataToBeValidatedById', async () => {
+        it('success', async () => {
+            const price = 1000000000;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const field1 = 'name';
+            const value1 = '';
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator02Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address, value: price });
+
+            const persona = await contractInstance.getPersonaByAddress(persona01Address);
+
+            const dataIds = await contractInstance.getIdsDataToBeValidatedIdByPersonaId(persona.personaId);
+
+            const result = await contractInstance.getDataToBeValidatedById(dataIds[0]);
+
+            assert.equal(persona.personaId.toNumber(), result.idPersona.toNumber(), 'worng personaId');
+            assert.equal(price, result.price.toNumber(), 'worng price');
+            assert.equal(field1, result.field, 'worng field');
+            assert.equal(ipfsHash, result.ipfsPath, 'worng ipfsHash');
+            assert.equal(validationStatus.ValidationPending, result.lastStatus.toNumber(), 'worng lastStatus');
+        });
+    });
+
+    describe('getIdsStampsByDataToBeValidatedId', async () => {
+        it('success', async () => {
+            const price = 1000000000;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const field1 = 'name';
+            const value1 = '';
+
+            const field2 = 'email';
+            const value2 = '';
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator02Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address, value: price });
+
+            await contractInstance.askToValidate(validator02Address, field2, value2, ipfsHash, { from: persona01Address, value: price });
+
+            await contractInstance.validate(persona01Address, field1, validationStatus.Validated, { from: validator01Address });
+
+            const persona = await contractInstance.getPersonaByAddress(persona01Address);
+
+            const dataIds = await contractInstance.getIdsDataToBeValidatedIdByPersonaId(persona.personaId);
+
+            const result = await contractInstance.getIdsStampsByDataToBeValidatedId(dataIds[0]);
+
+            assert.equal(1, result.length, 'wrong length');
+        });
+    });
+
+    describe('getStampById', async () => {
+        it('success', async () => {
+            const price = 1000000000;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const field1 = 'name';
+            const value1 = '';
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator02Address });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address, value: price });
+
+            await contractInstance.validate(persona01Address, field1, validationStatus.Validated, { from: validator01Address });
+
+            const persona = await contractInstance.getPersonaByAddress(persona01Address);
+
+            const dataIds = await contractInstance.getIdsDataToBeValidatedIdByPersonaId(persona.personaId);
+
+            const stampIds = await contractInstance.getIdsStampsByDataToBeValidatedId(dataIds[0]);
+
+            const result = await contractInstance.getStampById(stampIds[0]);
+
+            assert.equal(dataIds[0].toNumber(), result.idDataToBeValidated.toNumber(), 'worng idDataToBeValidated');
+            assert.equal(validationStatus.Validated, result.status.toNumber(), 'worng status');
+            assert.notEqual(0, result.whenDate.toNumber(), 'worng whenDate');
+            assert.equal(validator01Address, result.addressValidator, 'worng addressValidator');
         });
     });
 });

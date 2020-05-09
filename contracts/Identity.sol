@@ -3,11 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import './Strings.sol';
 
-//score +1 a cada validacao positiva
-//score -1 a cada validacao negativa
-
-//reputation +1 a cada validacao
-
 contract Identity is Strings {
     enum ValidationCostStrategy {
         ForFree,
@@ -24,13 +19,15 @@ contract Identity is Strings {
     struct Validator {
         uint validatorId;
         address payable validatorAddress;
-        uint reputation;
+        uint numberOfValidations;
         ValidationCostStrategy strategy;
         uint price;
         bool exists;
     }
 
     struct Stamp {
+        uint idStamp;
+        uint idDataToBeValidated;
         ValidationStatus status;
         uint whenDate;
         address addressValidator;
@@ -42,7 +39,6 @@ contract Identity is Strings {
         uint price;
         string field;
         string ipfsPath;
-        Stamp[] validations;
         ValidationStatus lastStatus;
     }
 
@@ -60,32 +56,18 @@ contract Identity is Strings {
     uint private _validatorId;
 
     Persona[] private _personas;
-    mapping(address => uint) private _personaIndex;
+    mapping(address => uint) private _personasIndex;
     uint private _personaId;
 
     DataToBeValidated[] private _validations;
     mapping(uint => uint[]) private _personaIdDataToBeValidate;
     mapping(uint => uint[]) private _validatorIdDataToBeValidate;
-    mapping(address => mapping(string=> DataToBeValidated)) _personaFieldValidate;
+    mapping(address => mapping(string => uint)) private _personaFieldValidate;
     uint private _dataToBeValidatedId;
 
-    constructor() public
-    {
-        Validator memory validator;
-        _validators.push(
-            validator
-        );
-
-        Persona memory persona;
-        _personas.push(
-            persona
-        );
-
-        DataToBeValidated memory validation;
-        _validations.push(
-            validation
-        );
-    }
+    Stamp[] private _validationStamps;
+    mapping(uint => uint[]) private _dataToBeValidateStamps;
+    uint private _stampId;
 
     event ValidatorAdded(
         address validatorAddress
@@ -99,6 +81,13 @@ contract Identity is Strings {
         address personaAddress,
         address validateAddress,
         string field
+    );
+
+    event Validated(
+        address personaAddress,
+        address validateAddress,
+        string field,
+        ValidationStatus validationStatus
     );
 
     modifier validatorExists(
@@ -128,8 +117,8 @@ contract Identity is Strings {
     )
     {
         require(
-            _personaIndex[personaAddress] != 0,
-            'Identity: validator not exists!'
+            _personasIndex[personaAddress] != 0,
+            'Identity: persona not exists!'
         );
         _;
     }
@@ -139,10 +128,45 @@ contract Identity is Strings {
     )
     {
         require(
-            _personaIndex[personaAddress] == 0,
+            _personasIndex[personaAddress] == 0,
             'Identity: persona already exists!'
         );
         _;
+    }
+
+    modifier dataToBeValidateExists(
+        address personaAddress,
+        string memory field
+    )
+    {
+        require(
+            _personaFieldValidate[personaAddress][field] != 0,
+            'Identity: data to be validate not exists!'
+        );
+        _;
+    }
+
+    constructor() public
+    {
+        Validator memory validator;
+        _validators.push(
+            validator
+        );
+
+        Persona memory persona;
+        _personas.push(
+            persona
+        );
+
+        DataToBeValidated memory validation;
+        _validations.push(
+            validation
+        );
+
+        Stamp memory stamp;
+        _validationStamps.push(
+            stamp
+        );
     }
 
     function getValidatorByAddress(
@@ -152,7 +176,7 @@ contract Identity is Strings {
         validatorExists(validatorAddress)
       returns(
         uint validatorId,
-        uint reputation,
+        uint numberOfValidations,
         ValidationCostStrategy strategy,
         uint price
       )
@@ -161,7 +185,7 @@ contract Identity is Strings {
         Validator memory validator = _validators[index];
         return(
             validator.validatorId,
-            validator.reputation,
+            validator.numberOfValidations,
             validator.strategy,
             validator.price
         );
@@ -217,7 +241,7 @@ contract Identity is Strings {
         uint score
       )
     {
-        uint index = _personaIndex[personaAddress];
+        uint index = _personasIndex[personaAddress];
         Persona memory persona = _personas[index];
         return(
             persona.personaId,
@@ -249,7 +273,7 @@ contract Identity is Strings {
             true
         ));
 
-        _personaIndex[msg.sender] = _personaId;
+        _personasIndex[msg.sender] = _personaId;
 
         emit PersonaAdded(msg.sender);
     }
@@ -273,7 +297,7 @@ contract Identity is Strings {
         personaExists(msg.sender)
     {
         Validator memory validator = _validators[_validatorsIndex[validatorAddress]];
-        Persona memory persona = _personas[_personaIndex[msg.sender]];
+        Persona memory persona = _personas[_personasIndex[msg.sender]];
 
         if(validator.strategy == ValidationCostStrategy.Charged){
             require(
@@ -292,7 +316,7 @@ contract Identity is Strings {
         if(!fieldExists){
             require(
                 bytes(value).length > 0,
-                'Identity: field is not inn persona fields, value is required'
+                'Identity: field is not in persona fields, value is required'
             );
             persona.infoFields[persona.infoFields.length - 1] = field;
             persona.infoValues[persona.infoValues.length - 1] = value;
@@ -300,29 +324,121 @@ contract Identity is Strings {
 
         _dataToBeValidatedId++;
 
-        Stamp[] storage stamps = new Stamp[](1);
-        stamps.push(Stamp({status: ValidationStatus.ValidationPending, whenDate: now, addressValidator: validatorAddress}));
-
-        DataToBeValidated memory dataToBeValidated = DataToBeValidated(
-            _dataToBeValidatedId,
-            persona.personaId,
-            msg.value,
-            field,
-            ipfsHash,
-            stamps,
-            ValidationStatus.ValidationPending
-        );
+        DataToBeValidated memory dataToBeValidated;
+        dataToBeValidated.idDataToBeValidated = _dataToBeValidatedId;
+        dataToBeValidated.idPersona = persona.personaId;
+        dataToBeValidated.price = msg.value;
+        dataToBeValidated.field = field;
+        dataToBeValidated.ipfsPath = ipfsHash;
+        dataToBeValidated.lastStatus = ValidationStatus.ValidationPending;
 
         _validations.push(dataToBeValidated);
 
         _personaIdDataToBeValidate[persona.personaId].push(_dataToBeValidatedId);
         _validatorIdDataToBeValidate[validator.validatorId].push(_dataToBeValidatedId);
-        _personaFieldValidate[msg.sender][field] = dataToBeValidated;
+        _personaFieldValidate[msg.sender][field] = _dataToBeValidatedId;
 
         emit ValidateAdded(
             persona.personaAddress,
             validator.validatorAddress,
             field
+        );
+    }
+
+    function validate(
+        address personaAddress,
+        string memory field,
+        ValidationStatus validationStatus
+    ) public
+      payable
+        validatorExists(msg.sender)
+        personaExists(personaAddress)
+        dataToBeValidateExists(personaAddress, field)
+    {
+        DataToBeValidated storage validation = _validations[_personaFieldValidate[personaAddress][field]];
+        validation.lastStatus = validationStatus;
+
+        _stampId++;
+        _validationStamps.push(Stamp(_stampId, validation.idDataToBeValidated, validationStatus, now, msg.sender));
+        _dataToBeValidateStamps[validation.idDataToBeValidated].push(_stampId);
+
+        if(validationStatus == ValidationStatus.Validated){
+            _personas[_personasIndex[personaAddress]].score++;
+        } else if(validationStatus == ValidationStatus.NotValidated && _personas[_personasIndex[personaAddress]].score > 0){
+            _personas[_personasIndex[personaAddress]].score--;
+        }
+
+        _validators[_validatorsIndex[msg.sender]].numberOfValidations++;
+
+        emit Validated(
+            personaAddress,
+            msg.sender,
+            field,
+            validationStatus
+        );
+    }
+
+    function getIdsDataToBeValidatedIdByPersonaId(
+        uint personaId
+    ) public
+      view
+      returns(
+        uint[] memory ids
+      )
+    {
+        return _personaIdDataToBeValidate[personaId];
+    }
+
+     function getDataToBeValidatedById(
+        uint dataToBeValidatedId
+    ) public
+      view
+      returns(
+        uint idPersona,
+        uint price,
+        string memory field,
+        string memory ipfsPath,
+        ValidationStatus lastStatus
+      )
+    {
+        DataToBeValidated storage data = _validations[dataToBeValidatedId];
+        return(
+            data.idPersona,
+            data.price,
+            data.field,
+            data.ipfsPath,
+            data.lastStatus
+        );
+    }
+
+    function getIdsStampsByDataToBeValidatedId(
+        uint dataToBeValidatedId
+    ) public
+      view
+      returns(
+        uint[] memory ids
+      )
+    {
+        return _dataToBeValidateStamps[dataToBeValidatedId];
+    }
+
+     function getStampById(
+        uint stampId
+    ) public
+      view
+      returns(
+        uint idDataToBeValidated,
+        ValidationStatus status,
+        uint whenDate,
+        address addressValidator
+      )
+    {
+        Stamp storage stamp = _validationStamps[stampId];
+        return(
+            stamp.idDataToBeValidated,
+            stamp.status,
+            stamp.whenDate,
+            stamp.addressValidator
         );
     }
 }

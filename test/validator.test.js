@@ -30,7 +30,7 @@ contract('Identity', accounts => {
                 'Identity: if strategy is charged, price must be greather than 0 or strategy ForFree price must be equal 0!'
             );
         });
-        
+
         it('should throw if validate already exists', async () => {
             const price = 0;
 
@@ -81,7 +81,7 @@ contract('Identity', accounts => {
             await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address });
             const result = await contractInstance.getValidatorByAddress(validator01Address);
 
-            assert.equal(0, result.reputation.toNumber(), 'wrong reputation');
+            assert.equal(0, result.numberOfValidations.toNumber(), 'wrong numberOfValidations');
             assert.equal(validationCostStrategy.Charged, result.strategy.toNumber(), 'wrong strategy');
             assert.equal(price, result.price.toNumber(), 'wrong price');
         });
