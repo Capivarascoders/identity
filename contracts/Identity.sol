@@ -23,6 +23,7 @@ contract Identity is Strings {
         ValidationCostStrategy strategy;
         uint price;
         bool exists;
+        bool active;
     }
 
     struct Stamp {
@@ -73,6 +74,14 @@ contract Identity is Strings {
         address validatorAddress
     );
 
+    event ValidatorDisabled(
+         address validatorAddress
+    );
+
+    event ValidatorReactivated(
+        address validatorAddress
+    );
+
     event PersonaAdded(
         address personaAddress
     );
@@ -90,6 +99,14 @@ contract Identity is Strings {
         ValidationStatus validationStatus
     );
 
+    modifier validatorSendedStake(){
+         require(
+            msg.value == 1 ether,
+            'You have to steak 1 ether to become a validator!'
+        );
+        _;
+    }
+
     modifier validatorExists(
         address validatorAddress
     )
@@ -101,12 +118,33 @@ contract Identity is Strings {
         _;
     }
 
+    modifier validatorIsActive(
+    )
+    {
+        uint index = _validatorsIndex[msg.sender];
+        require(
+            _validators[index].active,
+            'Identity: validator is not active!'
+        );
+        _;
+    }
+
+    modifier validatorIsNotActive(
+    )
+    {
+        uint index = _validatorsIndex[msg.sender];
+        require(
+            !_validators[index].active,
+            'Identity: validator is active!'
+        );
+        _;
+    }
+
     modifier validatorNotExists(
-        address validatorAddress
     )
     {
         require(
-            _validatorsIndex[validatorAddress] == 0,
+            _validatorsIndex[msg.sender] == 0,
             'Identity: validator already exists!'
         );
         _;
@@ -124,11 +162,10 @@ contract Identity is Strings {
     }
 
     modifier personaNotExists(
-        address personaAddress
     )
     {
         require(
-            _personasIndex[personaAddress] == 0,
+            _personasIndex[msg.sender] == 0,
             'Identity: persona already exists!'
         );
         _;
@@ -178,7 +215,8 @@ contract Identity is Strings {
         uint validatorId,
         uint numberOfValidations,
         ValidationCostStrategy strategy,
-        uint price
+        uint price,
+        bool active
       )
     {
         uint index = _validatorsIndex[validatorAddress];
@@ -187,7 +225,8 @@ contract Identity is Strings {
             validator.validatorId,
             validator.numberOfValidations,
             validator.strategy,
-            validator.price
+            validator.price,
+            validator.active
         );
     }
 
@@ -195,7 +234,9 @@ contract Identity is Strings {
         ValidationCostStrategy validationCostStrategy,
         uint price
     ) public
-        validatorNotExists(msg.sender)
+      payable
+        validatorSendedStake()
+        validatorNotExists()
     {
         require(
             validationCostStrategy == ValidationCostStrategy.ForFree &&
@@ -213,12 +254,41 @@ contract Identity is Strings {
             0,
             validationCostStrategy,
             price,
+            true,
             true
         ));
 
         _validatorsIndex[msg.sender] = _validatorId;
 
         emit ValidatorAdded(msg.sender);
+    }
+
+    function disableValidator(
+    ) public
+        validatorExists(msg.sender)
+        validatorIsActive()
+    {
+        address payable recipient = msg.sender;
+
+        uint index = _validatorsIndex[msg.sender];
+        _validators[index].active = false;
+
+        recipient.transfer(1 ether);
+
+        emit ValidatorDisabled(msg.sender);
+    }
+
+    function reactivateValidator(
+    ) public
+      payable
+        validatorSendedStake()
+        validatorExists(msg.sender)
+        validatorIsNotActive()
+    {
+        uint index = _validatorsIndex[msg.sender];
+        _validators[index].active = true;
+
+        emit ValidatorReactivated(msg.sender);
     }
 
     function getTotalValidators(
@@ -255,7 +325,7 @@ contract Identity is Strings {
         string[] memory fields,
         string[] memory values
     ) public
-        personaNotExists(msg.sender)
+        personaNotExists()
     {
         require(
             fields.length == values.length,
