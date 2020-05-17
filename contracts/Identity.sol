@@ -1,9 +1,10 @@
 pragma solidity 0.6.7;
 pragma experimental ABIEncoderV2;
 
+import './ownership/Ownable.sol';
 import './Strings.sol';
 
-contract Identity is Strings {
+contract Identity is Ownable, Strings {
     enum ValidationCostStrategy {
         ForFree,
         Charged
@@ -510,5 +511,16 @@ contract Identity is Strings {
             stamp.whenDate,
             stamp.addressValidator
         );
+    }
+
+    function getStakedValue(
+    ) public
+      view
+        onlyOwner()
+      returns(
+          uint
+      )
+    {
+        return address(this).balance;
     }
 }
