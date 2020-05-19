@@ -20,6 +20,7 @@ contract('Identity', accounts => {
     const validator01Address = accounts[1];
     const validator02Address = accounts[3];
     const persona01Address = accounts[2];
+    const persona02Address = accounts[4];
 
     before(async () => {
         web3.eth.defaultAccount = ownerAddress;
@@ -367,6 +368,40 @@ contract('Identity', accounts => {
             const validatorAfter = await contractInstance.getValidatorByAddress(validator01Address);
 
             assert.notEqual(validatorBefore.numberOfValidations, validatorAfter.numberOfValidations, 'wrong numberOfValidations');
+        });
+    });
+
+    describe.only('getIdsDataToBeValidatedIdByValidatorId', async () => {
+        it('success', async () => {
+            const price = 1000000000;
+            const stakeValue = 1000000000000000000;
+
+            const fields = ['name', 'email'];
+            const values = ['persona1', 'persona1@email.com'];
+
+            const field1 = 'name';
+            const value1 = '';
+
+            const field2 = 'email';
+            const value2 = '';
+
+            const ipfsHash = 'https://ipfs.infura.io/ipfs/Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address, value: stakeValue });
+
+            await contractInstance.addPersona(fields, values, { from: persona01Address });
+            
+            await contractInstance.addPersona(fields, values, { from: persona02Address });
+
+            await contractInstance.askToValidate(validator01Address, field1, value1, ipfsHash, { from: persona01Address, value: price });
+
+            await contractInstance.askToValidate(validator01Address, field2, value2, ipfsHash, { from: persona02Address, value: price });
+
+            const validator = await contractInstance.getValidatorByAddress(validator01Address);
+
+            const result = await contractInstance.getIdsDataToBeValidatedIdByValidatorId(validator.validatorId);
+
+            assert.equal(2, result.length, 'wrong length');
         });
     });
 

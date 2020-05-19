@@ -449,6 +449,17 @@ contract Identity is Ownable, Strings {
         );
     }
 
+    function getIdsDataToBeValidatedIdByValidatorId(
+        uint validatorId
+    ) public
+      view
+      returns(
+        uint[] memory ids
+      )
+    {
+        return _validatorIdDataToBeValidate[validatorId];
+    }
+
     function getIdsDataToBeValidatedIdByPersonaId(
         uint personaId
     ) public
