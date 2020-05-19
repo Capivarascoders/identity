@@ -44,4 +44,4 @@ truffle migrate --network <network_name>
 Contract address and transaction ID will be shown on screen.
 
 ### Address on Rinkeby network
-https://rinkeby.etherscan.io/address/0x20A13882268feFA5CE000019Ac15A52d9De842e9
+https://rinkeby.etherscan.io/address/0x25e519aD211788390f06fd5e2838a51cFC06B07a
