@@ -197,6 +197,25 @@ contract('Identity', accounts => {
         });
     });
 
+    describe('isValidator', async () => {
+        it('success false', async () => {
+            const result = await contractInstance.isValidator(validator01Address);
+
+            assert.equal(false, result, 'wrong result');
+        });
+
+        it('success true', async () => {
+            const price = 100;
+            const stakeValue = 1000000000000000000;
+
+            await contractInstance.addValidator(validationCostStrategy.Charged, price, { from: validator01Address, value: stakeValue });
+
+            const result = await contractInstance.isValidator(validator01Address);
+
+            assert.equal(true, result, 'wrong result');
+        });
+    });
+
     describe('getValidatorByAddress', async () => {
         it('should throw if validator not exists', async () => {
             await Assert.reverts(

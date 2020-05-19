@@ -207,6 +207,15 @@ contract Identity is Ownable, Strings {
         );
     }
 
+    function isValidator(
+        address validatorAddress
+    ) public
+      view
+      returns(bool)
+    {
+        return _validatorsIndex[validatorAddress] != 0;
+    }
+
     function getValidatorByAddress(
         address validatorAddress
     ) public

@@ -371,7 +371,7 @@ contract('Identity', accounts => {
         });
     });
 
-    describe.only('getIdsDataToBeValidatedIdByValidatorId', async () => {
+    describe('getIdsDataToBeValidatedIdByValidatorId', async () => {
         it('success', async () => {
             const price = 1000000000;
             const stakeValue = 1000000000000000000;
