@@ -1,4 +1,4 @@
-# Indentity Money
+# Identity Money
 
 ## Requeriments
 - [Node.js](https://nodejs.org/download/release/latest-v10.x/): `>=10.0.0`
